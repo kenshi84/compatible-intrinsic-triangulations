@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10.0)
 
 project(compatible_intrinsic_triangulations_demo)
 
+set(CMAKE_CXX_STANDARD 20)
+
 ### Configure output locations
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -81,19 +83,11 @@ add_subdirectory(deps/geometry-central)
 add_subdirectory(deps/glew-2.2.0/build/cmake)
 include_directories(deps/glew-2.2.0/include)
 
-# set(TBB_BUILD_STATIC ON CACHE BOOL " " FORCE)
-# set(TBB_BUILD_SHARED OFF CACHE BOOL " " FORCE)
-# set(TBB_BUILD_TBBMALLOC OFF CACHE BOOL " " FORCE)
-# set(TBB_BUILD_TBBMALLOC_PROXY OFF CACHE BOOL " " FORCE)
-# set(TBB_BUILD_TESTS OFF CACHE BOOL " " FORCE)
-# add_subdirectory(deps/tbb)
-
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/filesystem/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/spdlog/include")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/polyscope/deps/imgui")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imGuIZMOquat/imGuIZMO.quat/")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imGuIZMO.quat/imGuIZMO.quat/")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories("/usr/local/include/")
 include_directories("/opt/homebrew/include")
@@ -145,13 +139,13 @@ set(CIT_MAIN_SRCS
 option(BUILD_TEMP "Build temp.cpp instead of main.cpp and others" OFF)
 if (BUILD_TEMP)
   add_executable(temp src/temp.cpp)
-  target_link_libraries(temp geometry-central polyscope)
+  target_link_libraries(temp geometry-central)
 else()
   add_executable(cit_demo "${CIT_MAIN_SRCS}")
-  target_link_libraries(cit_demo geometry-central polyscope ${EXTRA_LIBS})
+  target_link_libraries(cit_demo geometry-central ${EXTRA_LIBS})
 
   add_executable(bc_extractor src/bc_extractor.cpp)
-  target_link_libraries(bc_extractor geometry-central polyscope)
+  target_link_libraries(bc_extractor geometry-central)
 
   add_executable(om_viewer
     cit_resources.cpp
@@ -159,7 +153,7 @@ else()
     deps/imgui/backends/imgui_impl_opengl2.cpp
     deps/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp
   )
-  target_link_libraries(om_viewer geometry-central polyscope ${EXTRA_LIBS})
+  target_link_libraries(om_viewer geometry-central ${EXTRA_LIBS})
 endif()
 
 option(BUILD_TESTS "Build tests" OFF)
@@ -188,7 +182,7 @@ if (BUILD_TESTS)
 
   FetchContent_MakeAvailable(googletest)
 
-  set_property(TARGET gtest PROPERTY CXX_STANDARD 11)
+  set_property(TARGET gtest PROPERTY CXX_STANDARD 20)
 
   set(CIT_TEST_SRCS
     test/test_main.cpp
@@ -197,5 +191,5 @@ if (BUILD_TESTS)
   )
 
   add_executable(cit_test "${CIT_TEST_SRCS}")
-  target_link_libraries(cit_test geometry-central polyscope gtest_main)
+  target_link_libraries(cit_test geometry-central gtest_main)
 endif()
