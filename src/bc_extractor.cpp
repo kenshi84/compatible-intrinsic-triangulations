@@ -271,7 +271,7 @@ int main(int argc, char** argv) {
       if (!first)
         oss << ", ";
       first = false;
-      oss << s;
+      oss << s.data();
     }
     oss << "}";
     logLevelHelp = oss.str();

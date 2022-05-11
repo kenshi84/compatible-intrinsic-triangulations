@@ -7,8 +7,8 @@
 using namespace cit;
 
 #include "args/args.hxx"
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl2.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl2.h"
 #include "kt84/glfw_util.hh"
 
 #pragma clang diagnostic push
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
       if (!first)
         oss << ", ";
       first = false;
-      oss << s;
+      oss << s.data();
     }
     oss << "}";
     logLevelHelp = oss.str();
@@ -81,8 +81,8 @@ int main(int argc, char** argv) {
   // Some constants per model
   mdataA.shortName = "A";
   mdataB.shortName = "B";
-  mdataA.fullName = polyscope::guessNiceNameFromPath(args::get(argMeshA));
-  mdataB.fullName = polyscope::guessNiceNameFromPath(args::get(argMeshB));
+  mdataA.fullName = guessNiceNameFromPath(args::get(argMeshA));
+  mdataB.fullName = guessNiceNameFromPath(args::get(argMeshB));
   mdataA.inputEdgeColor = Vector3f{91.f, 155.f, 213.f} / 255.f;
   mdataB.inputEdgeColor = Vector3f{237.f, 125.f, 49.f} / 255.f;
 
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-      currentConfig.id = std::stoll(polyscope::guessNiceNameFromPath(args::get(argDeserialize)));
+      currentConfig.id = std::stoll(guessNiceNameFromPath(args::get(argDeserialize)));
     } catch (...) {}
 
     computeEdgePath(currentConfig);

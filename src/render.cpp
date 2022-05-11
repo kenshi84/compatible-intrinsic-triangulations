@@ -1,8 +1,8 @@
 #include "cit.hpp"
 #include "imgui.h"
 
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl2.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl2.h"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreorder"
 #pragma clang diagnostic ignored "-Woverloaded-virtual"

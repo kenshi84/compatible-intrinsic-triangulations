@@ -3,7 +3,6 @@
 #include "geometrycentral/surface/signpost_intrinsic_triangulation.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 #include "geometrycentral/utilities/combining_hash_functions.h"
-#include "polyscope/utilities.h"
 
 #include "kt84/graphics/DisplayList.hh"
 #include "kt84/graphics/TextureObjectT.hh"
@@ -17,8 +16,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
-#include <ghc/filesystem.hpp>
-namespace filesystem = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace spdlog {
   using logger_ptr = std::shared_ptr<spdlog::logger>;   // so commonly used, why not already defined?
@@ -596,6 +595,8 @@ std::array<Face, 2> adjacentFaces(Edge e);
 std::array<Vertex, 3> adjacentVertices(Face f);
 std::array<Halfedge, 3> adjacentHalfedges(Face f);
 std::array<Face, 3> adjacentFaces(Face f);
+
+std::string guessNiceNameFromPath(std::string fullname);  // copied from https://github.com/nmwsharp/polyscope/blob/master/src/utilities.cpp
 
 
 //---------------------+

@@ -11,8 +11,8 @@
 #include "geometrycentral/utilities/elementary_geometry.h"
 #include "args/args.hxx"
 
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl2.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl2.h"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreorder"
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
@@ -762,7 +762,7 @@ int main(int argc, char** argv) {
       if (!first)
         oss << ", ";
       first = false;
-      oss << s;
+      oss << s.data();
     }
     oss << "}";
     logLevelHelp = oss.str();

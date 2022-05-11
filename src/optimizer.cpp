@@ -393,7 +393,7 @@ bool cit::optimizeOneStep(bool doTemporalSmoothing) {
     return false;
   }
   updateConfiguration(newConfig[l_chosen.value + 1], l_chosen.value);
-  filesystem::copy_file(
+  fs::copy_file(
     getResultFileName(ResultContext::FindOptimalStep, currentConfig.id, currentConfig.previous_id, l_chosen.value) + ".log",
     getResultFileName(ResultContext::UpdateConfiguration, currentConfig.id) + ".log"
   );

@@ -497,10 +497,10 @@ void cit::writeBlobToFile(const std::string& filename, const std::string& blob) 
 }
 
 std::string cit::readBlobFromFile(const std::string& filename) {
-  if (!filesystem::exists(filename))
+  if (!fs::exists(filename))
     throw std::runtime_error("File doesn't exist: " + filename);
 
-  if (!filesystem::is_regular_file(filename))
+  if (!fs::is_regular_file(filename))
     throw std::runtime_error("Not a regular file: " + filename);
 
   std::ifstream ifs(filename.c_str(), std::ios::binary);
@@ -866,8 +866,8 @@ void cit::writeOverlayMesh(const Configuration& config) {
   }
 #endif
 
-  filesystem::create_directory(getResultFileNameBase());
-  filesystem::create_directory(getResultFileNameBase() + "/meshes");
+  fs::create_directory(getResultFileNameBase());
+  fs::create_directory(getResultFileNameBase() + "/meshes");
 
   std::string filename_AonB = getResultFileNameBase() + "/meshes/" + std::to_string(config.id) + "_AonB";
   std::string filename_BonA = getResultFileNameBase() + "/meshes/" + std::to_string(config.id) + "_BonA";
@@ -1254,4 +1254,29 @@ std::array<Face, 3> cit::adjacentFaces(Face f) {
     f.halfedge().next().twin().face(),
     f.halfedge().next().next().twin().face()
   };
+}
+
+std::string cit::guessNiceNameFromPath(std::string fullname) {  // copied from https://github.com/nmwsharp/polyscope/blob/master/src/utilities.cpp
+  size_t startInd = 0;
+  for (std::string sep : {"/", "\\"}) {
+    size_t pos = fullname.rfind(sep);
+    if (pos != std::string::npos) {
+      startInd = std::max(startInd, pos + 1);
+    }
+  }
+
+  size_t endInd = fullname.size();
+  for (std::string sep : {"."}) {
+    size_t pos = fullname.rfind(sep);
+    if (pos != std::string::npos) {
+      endInd = std::min(endInd, pos);
+    }
+  }
+
+  if (startInd >= endInd) {
+    return fullname;
+  }
+
+  std::string niceName = fullname.substr(startInd, endInd - startInd);
+  return niceName;
 }

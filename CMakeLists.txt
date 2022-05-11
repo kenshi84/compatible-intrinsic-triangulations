@@ -85,12 +85,15 @@ include_directories(deps/glew-2.2.0/include)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/spdlog/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imGuIZMO.quat/imGuIZMO.quat/")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories("/usr/local/include/")
 include_directories("/opt/homebrew/include")
+
+# Boost
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # bin2c borrowed from https://github.com/wjakob/nanogui
 file(GLOB resources "${CMAKE_CURRENT_SOURCE_DIR}/resources/*")
@@ -107,6 +110,27 @@ add_custom_command(
   DEPENDS ${resources}
   COMMENT "Running bin2c"
   PRE_BUILD VERBATIM)
+
+# GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/deps/glfw")
+
+# ImGUI (CMakeLists.txt not provided)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/backends")
+add_library(imgui
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/imgui.cpp
+  # ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/imgui_demo.cpp       # Useful for testing via ImGui::ShowDemoWindow
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/imgui_draw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/imgui_tables.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/imgui_widgets.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/backends/imgui_impl_glfw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imgui/backends/imgui_impl_opengl2.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/deps/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp)
+target_link_libraries(imgui glfw)
 
 # == Build our project stuff
 
@@ -132,8 +156,6 @@ set(CIT_MAIN_SRCS
   src/render.cpp
   src/serialization.cpp
   src/utility.cpp
-  deps/imgui/backends/imgui_impl_opengl2.cpp
-  deps/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp
 )
 
 option(BUILD_TEMP "Build temp.cpp instead of main.cpp and others" OFF)
@@ -142,7 +164,7 @@ if (BUILD_TEMP)
   target_link_libraries(temp geometry-central)
 else()
   add_executable(cit_demo "${CIT_MAIN_SRCS}")
-  target_link_libraries(cit_demo geometry-central ${EXTRA_LIBS})
+  target_link_libraries(cit_demo geometry-central glew imgui ${EXTRA_LIBS})
 
   add_executable(bc_extractor src/bc_extractor.cpp)
   target_link_libraries(bc_extractor geometry-central)
@@ -150,10 +172,8 @@ else()
   add_executable(om_viewer
     cit_resources.cpp
     src/om_viewer.cpp
-    deps/imgui/backends/imgui_impl_opengl2.cpp
-    deps/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp
   )
-  target_link_libraries(om_viewer geometry-central ${EXTRA_LIBS})
+  target_link_libraries(om_viewer geometry-central glew imgui ${EXTRA_LIBS})
 endif()
 
 option(BUILD_TESTS "Build tests" OFF)
