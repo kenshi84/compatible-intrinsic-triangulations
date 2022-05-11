@@ -74,9 +74,8 @@ add_definitions(-DIMGUIZMO_USE_ONLY_ROT)
 
 # Needed to prevent the use of system-installed TBB via geometry-central/cmake/FindSuiteSparse.cmake
 set(SUITESPARSE OFF CACHE BOOL " " FORCE)
+set(GC_EIGEN_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/deps/eigen CACHE PATH "Eigen path")
 add_subdirectory(deps/geometry-central)
-
-add_subdirectory(deps/polyscope)
 
 # GLEW
 add_subdirectory(deps/glew-2.2.0/build/cmake)
@@ -139,8 +138,8 @@ set(CIT_MAIN_SRCS
   src/render.cpp
   src/serialization.cpp
   src/utility.cpp
-  deps/polyscope/deps/imgui/imgui/examples/imgui_impl_opengl2.cpp
-  deps/imGuIZMOquat/imGuIZMO.quat/imGuIZMOquat.cpp
+  deps/imgui/backends/imgui_impl_opengl2.cpp
+  deps/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp
 )
 
 option(BUILD_TEMP "Build temp.cpp instead of main.cpp and others" OFF)
@@ -157,8 +156,8 @@ else()
   add_executable(om_viewer
     cit_resources.cpp
     src/om_viewer.cpp
-    deps/polyscope/deps/imgui/imgui/examples/imgui_impl_opengl2.cpp
-    deps/imGuIZMOquat/imGuIZMO.quat/imGuIZMOquat.cpp
+    deps/imgui/backends/imgui_impl_opengl2.cpp
+    deps/imGuIZMO.quat/imGuIZMO.quat/imGuIZMOquat.cpp
   )
   target_link_libraries(om_viewer geometry-central polyscope ${EXTRA_LIBS})
 endif()
