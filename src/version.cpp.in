@@ -1,0 +1,3 @@
+#include "cit.hpp"
+
+const char* const cit::VERSIONTAG = "@VERSIONTAG@";
