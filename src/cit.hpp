@@ -204,7 +204,7 @@ struct ModelData {
   std::unique_ptr<CornerData<Vector2>> texCoords;
 
   size_t nV;
-  std::set<size_t> anchorVertexIDs;                // Input vertex indices which are "fixed" (vertex-vertex correspondence in the original HOT data to be kept intact)
+  std::set<size_t> anchorVertexIDs;                // Input vertex indices which are "fixed" (vertex-vertex correspondence in the input vertex image to be kept intact)
   EdgeData<Matrix2d> transportOperator;
 
   AlignedBox3d bbox;
