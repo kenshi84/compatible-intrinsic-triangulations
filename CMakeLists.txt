@@ -23,8 +23,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STR
 
   # using Clang (linux or apple) or GCC
   message("Using clang/gcc compiler flags")
-  SET(BASE_CXX_FLAGS "-std=c++14 -Wall -Wextra -g3")
-  SET(DISABLED_WARNINGS " -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-deprecated-declarations -Wno-missing-braces -Wno-unused-private-field -Wno-logical-op-parentheses -Wno-unknown-pragmas -Wno-deprecated -Wno-unused-but-set-variable -Wno-unused-but-set-parameter -Wno-reorder-ctor -Wno-overloaded-virtual")
+  SET(BASE_CXX_FLAGS "-Wall -Wextra -g3")
+  SET(DISABLED_WARNINGS " -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-deprecated-declarations -Wno-missing-braces -Wno-unused-private-field -Wno-logical-op-parentheses -Wno-unknown-pragmas -Wno-deprecated -Wno-reorder-ctor -Wno-overloaded-virtual")
   SET(TRACE_INCLUDES " -H -Wno-error=unused-command-line-argument")
 
   if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -69,7 +69,6 @@ else()
   message( FATAL_ERROR "Unrecognized compiler [${CMAKE_CXX_COMPILER_ID}]" )
 endif()
 
-add_definitions(-DGHC_WITH_EXCEPTIONS)
 add_definitions(-DIMGUIZMO_USE_ONLY_ROT)
 
 # == Deps
@@ -158,23 +157,17 @@ set(CIT_MAIN_SRCS
   src/utility.cpp
 )
 
-option(BUILD_TEMP "Build temp.cpp instead of main.cpp and others" OFF)
-if (BUILD_TEMP)
-  add_executable(temp src/temp.cpp)
-  target_link_libraries(temp geometry-central)
-else()
-  add_executable(cit_demo "${CIT_MAIN_SRCS}")
-  target_link_libraries(cit_demo geometry-central glew imgui ${EXTRA_LIBS})
+add_executable(cit_demo "${CIT_MAIN_SRCS}")
+target_link_libraries(cit_demo geometry-central glew imgui ${EXTRA_LIBS})
 
-  add_executable(bc_extractor src/bc_extractor.cpp)
-  target_link_libraries(bc_extractor geometry-central)
+add_executable(bc_extractor src/bc_extractor.cpp)
+target_link_libraries(bc_extractor geometry-central)
 
-  add_executable(om_viewer
-    cit_resources.cpp
-    src/om_viewer.cpp
-  )
-  target_link_libraries(om_viewer geometry-central glew imgui ${EXTRA_LIBS})
-endif()
+add_executable(om_viewer
+  cit_resources.cpp
+  src/om_viewer.cpp
+)
+target_link_libraries(om_viewer geometry-central glew imgui ${EXTRA_LIBS})
 
 option(BUILD_TESTS "Build tests" OFF)
 if (BUILD_TESTS)
