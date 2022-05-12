@@ -23,7 +23,7 @@ jobs:
       with:
         submodules: recursive
     - name: install dependencies
-      run: sudo apt -y install libboost-all-dev
+      run: sudo apt-get install libboost-all-dev libglu1-mesa-dev mesa-common-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
     - name: build
       run: |
         mkdir build
