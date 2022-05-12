@@ -1,0 +1,15 @@
+name: build
+on: [push, pull_request]
+jobs:
+  build-macos:
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: build
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make -j3
