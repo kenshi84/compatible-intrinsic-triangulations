@@ -55,6 +55,7 @@ template<typename FormatString, typename... Args> void logCritical(spdlog::logge
 #include <fstream>
 #include <sstream>
 #include <set>
+#include <deque>
 #include <random>
 #include <unordered_map>
 #include <unordered_set>
