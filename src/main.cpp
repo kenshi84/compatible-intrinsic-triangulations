@@ -26,15 +26,13 @@ int main(int argc, char** argv) {
   // clang-format off
   args::ArgumentParser parser("Compatible Intrinsic Triangulations Demo (version: " + std::string(VERSIONTAG) + ")");
   args::HelpFlag help(parser, "help", "Display this help message", {'h', "help"});
-  args::ValueFlag<std::string> argMapAtoB(parser, "file", "The barycentric coordinates of A's vertices on B", {"mapAtoB"});
-  args::ValueFlag<std::string> argMapBtoA(parser, "file", "The barycentric coordinates of B's vertices on A", {"mapBtoA"});
+  args::ValueFlag<std::string> argDataDir(parser, "path", "Path to the data directory to read from / write to (default: current directory)", {"dataDir"});
   args::ValueFlag<std::string> argDeserialize(parser, "file", "Deserialize from file", {"deserialize"});
   args::ValueFlag<std::string> argTextureA(parser, "file", "Texture image file for A", {"textureA"});
   args::ValueFlag<std::string> argTextureB(parser, "file", "Texture image file for B", {"textureB"});
   // args::ValueFlag<unsigned int> argNThreads(parser, "number", "Number of threads for parallel execution", {"nThreads"});
   // args::ValueFlag<double> argAngleThreshold(parser, "number", "Minimum angle threshold", {"angleThreshold"});
   args::Flag argFixAnchors(parser, "", "Fix anchor vertices", {"fixAnchors"});
-  args::ValueFlag<std::string> argCaseName(parser, "name", "Name for the experiment case", {"caseName"});
   args::ValueFlag<double> argSnapThreshold(parser, "number", "Threshold for snapping face points to edges", {"snapThreshold"});
   args::ValueFlag<double> argInitialWeightLap(parser, "number", "Initial value for Laplacian weight", {"initialWeightLap"});
   args::ValueFlag<double> argArgmijo(parser, "number", "Armijo constant", {"armijo"});
@@ -57,9 +55,6 @@ int main(int argc, char** argv) {
   }
   args::ValueFlag<std::string> argLogLevel(parser, "level", logLevelHelp, {"log-level"});
 
-  args::Positional<std::string> argMeshA(parser, "meshA", "The mesh of model A");
-  args::Positional<std::string> argMeshB(parser, "meshB", "The mesh of model B");
-
   // Parse args
   try {
     parser.ParseCLI(argc, argv);
@@ -72,24 +67,20 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  // Make sure a mesh name was given
-  if (!argMeshA || !argMeshB) {
-    std::cout << parser;
-    return EXIT_FAILURE;
-  }
+  auto ensure_existence = [](const fs::path& p) {
+    CIT_ASSERT_WITH_LOG(fs::exists(p), "Path {} doesn't exist", (std::string)p);
+  };
+
+  // Set data directory
+  dataDir = argDataDir ? args::get(argDataDir) : (std::string)fs::current_path();
+  SPDLOG_INFO("Data directory: {}", dataDir);
+  ensure_existence(dataDir);
 
   // Some constants per model
-  mdataA.shortName = "A";
-  mdataB.shortName = "B";
-  mdataA.fullName = guessNiceNameFromPath(args::get(argMeshA));
-  mdataB.fullName = guessNiceNameFromPath(args::get(argMeshB));
+  mdataA.name = "A";
+  mdataB.name = "B";
   mdataA.inputEdgeColor = Vector3f{91.f, 155.f, 213.f} / 255.f;
   mdataB.inputEdgeColor = Vector3f{237.f, 125.f, 49.f} / 255.f;
-
-  if (argCaseName)
-    caseName = args::get(argCaseName);
-  else
-    caseName = mdataA.fullName + "-" + mdataB.fullName;
 
   // Configure logging
   spdlog::set_automatic_registration(false);
@@ -196,8 +187,20 @@ int main(int argc, char** argv) {
 
   // Read mesh from file and do some preprocessing
   try {
-    readInputMesh(mdataA, args::get(argMeshA));
-    readInputMesh(mdataB, args::get(argMeshB));
+    if (fs::exists(dataDir + "/A-orig-refined.obj")) {
+      DLOG_INFO(0, "A-orig-refined.obj found; trying to read B-orig-refined.obj as the counterpart");
+      ensure_existence(dataDir + "/B-orig-refined.obj");
+      readInputMesh(mdataA, dataDir + "/A-orig-refined.obj");
+      readInputMesh(mdataB, dataDir + "/B-orig-refined.obj");
+
+    } else {
+      DLOG_INFO(0, "Trying to read A-orig.obj and B-orig.obj ...");
+      ensure_existence(dataDir + "/A-orig.obj");
+      ensure_existence(dataDir + "/B-orig.obj");
+      readInputMesh(mdataA, dataDir + "/A-orig.obj");
+      readInputMesh(mdataB, dataDir + "/B-orig.obj");
+    }
+    
   } catch(const std::exception& e) {
     DLOG_ERROR(0, "Failed to read input mesh: {}", e.what());
     return EXIT_FAILURE;
@@ -228,12 +231,6 @@ int main(int argc, char** argv) {
   }
 
   if (argDeserialize) {
-    if (argMapAtoB || argMapBtoA) {
-      DLOG_ERROR(0, "--deserialize and {--mapAtoB, --mapBtoA} are mutually exclusive.");
-      std::cout << parser;
-      return EXIT_FAILURE;
-    }
-
     try {
       fromSerializedBlob(readBlobFromFile(args::get(argDeserialize)), currentConfig, currentHistory, current_wL, current_smax, sysParam.firstOrderMode, current_nSteps);
     } catch (const std::exception& e) {
@@ -251,17 +248,14 @@ int main(int argc, char** argv) {
       computeDescentDirection(currentConfig, currentHistory, current_wL, 0);
 
   } else {
-    if (!argMapAtoB || !argMapBtoA) {
-      DLOG_ERROR(0, "Both of --mapAtoB & --mapBtoA must be specified when not using --deserialize.");
-      std::cout << parser;
-      return EXIT_FAILURE;
-    }
-
     // read solution vector from file
     VectorXsp x(mdataA.nV + mdataB.nV);
     try {
-      x.head(mdataA.nV) = readBarycentricCoordinates(mdataA, mdataB, args::get(argMapAtoB)); // passing mdataB because the specified points live on B
-      x.tail(mdataB.nV) = readBarycentricCoordinates(mdataB, mdataA, args::get(argMapBtoA));
+      DLOG_INFO(0, "Trying to read AtoB.txt and BtoA.txt ...");
+      ensure_existence(dataDir + "/AtoB.txt");
+      ensure_existence(dataDir + "/BtoA.txt");
+      x.head(mdataA.nV) = readBarycentricCoordinates(mdataA, mdataB, dataDir + "/AtoB.txt"); // passing mdataB because the specified points live on B
+      x.tail(mdataB.nV) = readBarycentricCoordinates(mdataB, mdataA, dataDir + "/BtoA.txt");
     } catch (const std::exception& e) {
       DLOG_ERROR(0, "Failed to read barycentric coordinates: {}", e.what());
       return EXIT_FAILURE;

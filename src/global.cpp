@@ -16,6 +16,8 @@ Configuration currentConfig, initialConfig;
 
 std::map<uint64_t, ResultInfo> resultInfoTable;
 
+std::string dataDir;
+
 double current_wL = 0.;
 double current_smax = 1.;
 std::list<std::pair<VectorXd, SparseMatrixd>> currentHistory;
@@ -29,7 +31,6 @@ int window_height;
 ImGuiIO* io;
 uint64_t sessionID;
 kt84::TextureObject colormapTexture;
-std::string caseName;
 
 int highlightedVertexID = 0;
 std::pair<int, int> highlightedEdgeID = {0, 0};

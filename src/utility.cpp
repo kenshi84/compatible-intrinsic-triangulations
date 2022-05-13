@@ -13,7 +13,7 @@ void cit::readInputMesh(ModelData& mdata, const std::string& inputFilename) {
   std::tie(mdata.mesh, mdata.geometry, mdata.texCoords) = readManifoldSurfaceMesh(inputFilename);
 
   mdata.nV = mdata.mesh->nVertices();
-  DLOG_INFO(0, "Model {}:", mdata.shortName);
+  DLOG_INFO(0, "Model {}:", mdata.name);
   DLOG_INFO(0, "  #vertices: {}", mdata.nV);
   DLOG_INFO(0, "  #faces: {}", mdata.mesh->nFaces());
 
@@ -80,7 +80,7 @@ void cit::readInputMesh(ModelData& mdata, const std::string& inputFilename) {
 }
 
 VectorXsp cit::readBarycentricCoordinates(ModelData& mdataFrom, const ModelData& mdataTo, const std::string& filename) {
-  DLOG_INFO(0, "Reading barycentric coordinates mapping {} vertices onto {}", mdataFrom.shortName, mdataTo.shortName);
+  DLOG_INFO(0, "Reading barycentric coordinates mapping {} vertices onto {}", mdataFrom.name, mdataTo.name);
 
   // Read sparse matrix data from file, store per row
   std::map<int, std::set<std::pair<int, double>>> rows;
@@ -1086,7 +1086,7 @@ void cit::makeIntrinsicEdgesConsistentlyOriented(CoInTri& cointriP, const CoInTr
     // This intrinsic edge is original on both P & Q simultaneously; the orientation judgement may be in conflict between P & Q,
     // so we adopt the judgement in A
     if (P_original && Q_original) {
-      if (cointriP.mdata->shortName == "A") {
+      if (cointriP.mdata->name == "A") {
         if (P_reversed)
           doSwitch = true;
       } else {

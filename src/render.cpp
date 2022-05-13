@@ -133,9 +133,9 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
 
   // input faces
   if (tweaks.b["showFaces"]) {
-    std::string fillMode = tweaks.s["fillMode" + mdataP.shortName];
-    if (fillMode == "Texture" + mdataP.shortName && !mdataP.texCoords) fillMode = "Constant";
-    if (fillMode == "Texture" + mdataQ.shortName && !mdataQ.texCoords) fillMode = "Constant";
+    std::string fillMode = tweaks.s["fillMode" + mdataP.name];
+    if (fillMode == "Texture" + mdataP.name && !mdataP.texCoords) fillMode = "Constant";
+    if (fillMode == "Texture" + mdataQ.name && !mdataQ.texCoords) fillMode = "Constant";
     if (fillMode == "Constant" || fillMode == "fIntrinsic") {
       // Constant color, no texturing
       if (fillMode == "Constant") {
@@ -154,7 +154,7 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
           glColor3d(Vector3::constant(0.3) + 0.7 * getRandomColor(polygon.fIntrinsic.getIndex()));
           glBegin(GL_POLYGON);
           for (const OverlayWedge& wedge : polygon.wedges) {
-            SurfacePoint facePointP = mdataP.shortName == "A" ? wedge.facePointA : wedge.facePointB;
+            SurfacePoint facePointP = mdataP.name == "A" ? wedge.facePointA : wedge.facePointB;
             glNormal3d(mdataP.geometry->faceNormals[facePointP.face]);
             glVertex3d(facePointP.interpolate(mdataP.geometry->inputVertexPositions));
           }
@@ -165,7 +165,7 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
     } else {
       // Textured drawing
       glEnable(GL_TEXTURE_2D);
-      if (fillMode == "Texture" + mdataP.shortName) {
+      if (fillMode == "Texture" + mdataP.name) {
         // Model P's original texture
         glColor3d(1,1,1);             // For texture modulation
         mdataP.texture.bind();
@@ -179,15 +179,15 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
         }
         glEnd();
 
-      } else if (fillMode == "Texture" + mdataQ.shortName && currentConfig.topologyValid) {
+      } else if (fillMode == "Texture" + mdataQ.name && currentConfig.topologyValid) {
         // Model Q's texture transferred on P
         glColor3d(1,1,1);             // For texture modulation
         mdataQ.texture.bind();
         for (const OverlayPolygon& polygon : currentConfig.overlayPolygons) {
           glBegin(GL_POLYGON);
           for (const OverlayWedge& wedge : polygon.wedges) {
-            SurfacePoint facePointP = mdataP.shortName == "A" ? wedge.facePointA : wedge.facePointB;
-            SurfacePoint facePointQ = mdataP.shortName == "A" ? wedge.facePointB : wedge.facePointA;
+            SurfacePoint facePointP = mdataP.name == "A" ? wedge.facePointA : wedge.facePointB;
+            SurfacePoint facePointQ = mdataP.name == "A" ? wedge.facePointB : wedge.facePointA;
 
             // Get interpolated texture coordinate at the wedge
             Halfedge Q_he = facePointQ.face.halfedge();
@@ -216,7 +216,7 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
           glTexCoord2d(t, 0.5);
           glBegin(GL_POLYGON);
           for (const OverlayWedge& wedge : polygon.wedges) {
-            SurfacePoint facePointP = mdataP.shortName == "A" ? wedge.facePointA : wedge.facePointB;
+            SurfacePoint facePointP = mdataP.name == "A" ? wedge.facePointA : wedge.facePointB;
             glNormal3d(mdataP.geometry->faceNormals[facePointP.face]);
             glVertex3d(facePointP.interpolate(mdataP.geometry->inputVertexPositions));
           }

@@ -150,11 +150,7 @@ inline double cit::getRadiusRatio(const SignpostIntrinsicTriangulation& geometry
 }
 
 inline std::string cit::getResultFileNameBase() {
-  std::string res = "results/" + caseName;
-  if (sysParam.fixAnchors)
-    res += "-fixAnchors";
-  res += "/" + std::to_string(sessionID);
-  return res;
+  return dataDir + std::string("/results/") + std::to_string(sessionID);
 }
 
 inline std::string cit::getResultFileName(ResultContext context, uint64_t id, uint64_t previous_id, int l) {

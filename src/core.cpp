@@ -5,7 +5,7 @@ void cit::insertVertices(const VectorXsp& P_x, const CoInTri& cointriP, CoInTri&
   DLOG_TRACE(logDepth, "BEGIN insertVertices");
   auto scopeExit = kt84::make_ScopeExit([&](){ DLOG_TRACE(logDepth, "END   insertVertices"); });
 
-  LOG_INFO(logger, logDepth, "Inserting vertices (from {} to {})", cointriP.mdata->shortName, cointriQ.mdata->shortName);
+  LOG_INFO(logger, logDepth, "Inserting vertices (from {} to {})", cointriP.mdata->name, cointriQ.mdata->name);
   const size_t P_nV = cointriP.mdata->nV;
   const size_t Q_nV = cointriQ.mdata->nV;
   CIT_ASSERT(P_nV != Q_nV);
@@ -327,7 +327,7 @@ size_t cit::simpleFlip(Configuration& config, spdlog::logger_ptr logger, size_t 
       }
     }
     if (res)
-      LOG_INFO(logger, logDepth, "* Flipped {} edges (mutable {}, fixed {})", res, cointriP.mdata->shortName, cointriQ.mdata->shortName);
+      LOG_INFO(logger, logDepth, "* Flipped {} edges (mutable {}, fixed {})", res, cointriP.mdata->name, cointriQ.mdata->name);
     return res;
   };
 
@@ -903,7 +903,7 @@ size_t cit::convexifyConcaveIncompatiblePatch(Configuration& config, spdlog::log
         u[j] = cointri.uniqueID_per_Vertex[v[j]];
 
       if (patch.vertexAngleSums.at(v[1]) < M_PI) continue;
-      LOG_DEBUG(logger, logDepth, "Model {}'s inconsitent patch boundary vertex {} has large angle sum {}, trying to convexify...", cointri.mdata->shortName, u[1], patch.vertexAngleSums.at(v[1]));
+      LOG_DEBUG(logger, logDepth, "Model {}'s inconsitent patch boundary vertex {} has large angle sum {}, trying to convexify...", cointri.mdata->name, u[1], patch.vertexAngleSums.at(v[1]));
 
       if (isVertexMovable(cointri, v[1])) {
         // Simply move v[1] to the midpoint of the line connecting v[0] & v[2]
@@ -1777,7 +1777,7 @@ void cit::computeEdgePath(Configuration& config, size_t logDepth) {
 
   // Step 1: trace intrinsic edge over input mesh
   auto computeEdgePath_inner1 = [&logDepth](CoInTri& cointri) {
-    DLOG_INFO(logDepth, "Tracing intrinsic edges on {} ... ", cointri.mdata->shortName);
+    DLOG_INFO(logDepth, "Tracing intrinsic edges on {} ... ", cointri.mdata->name);
     cointri.intrinsicEdgePath = cointri.signpostTri->traceEdges();
     DLOG_INFO(logDepth, "  Done");
   };
@@ -1786,7 +1786,7 @@ void cit::computeEdgePath(Configuration& config, size_t logDepth) {
 
   // Step 2: rearrange intrinsic edge's path points on input mesh to get input edge's path points on intrinsic mesh
   auto computeEdgePath_inner2 = [&config, &logDepth](CoInTri& cointri) {
-    DLOG_INFO(logDepth, "Rearranging traced path points to fill input edge path on {} ...", cointri.mdata->shortName);
+    DLOG_INFO(logDepth, "Rearranging traced path points to fill input edge path on {} ...", cointri.mdata->name);
 
     // use std::map to sort points on each input edge intersected by intrinsic edges
     EdgeData<std::map<double, SurfacePoint>> inputEdgePathOnIntrinsic_map(cointri.signpostTri->inputMesh);
@@ -1865,7 +1865,7 @@ void cit::computeEdgePath(Configuration& config, size_t logDepth) {
     const ModelData& mdataP = *cointriP.mdata;
     const ModelData& mdataQ = *cointriQ.mdata;
 
-    DLOG_INFO(logDepth, "Tracing input edge path of {} over {} ... ", mdataP.shortName, mdataQ.shortName);
+    DLOG_INFO(logDepth, "Tracing input edge path of {} over {} ... ", mdataP.name, mdataQ.name);
 
     cointriP.inputEdgePathOnOtherInput = EdgeData<std::vector<SurfacePoint>>(cointriP.signpostTri->inputMesh);
 
@@ -1926,7 +1926,7 @@ void cit::computeEdgePath(Configuration& config, size_t logDepth) {
           if (!cointriQ.signpostTri->isIntrinsicEdgePartiallyOriginal(Q_intrinsicSP.edge)) {
             OverlayVertex overlayVertex = getOverlayVertexAtEdgeIntersection(config, {P_inputE, Q_intrinsicSP.edge});
             for (OverlayWedge& wedge : config.overlayWedgesPerOverlayVertex.at(overlayVertex)) {
-              if (mdataP.shortName == "A")
+              if (mdataP.name == "A")
                 wedge.facePointB = traceResult.endPoint;
               else
                 wedge.facePointA = traceResult.endPoint;
@@ -3922,7 +3922,7 @@ VectorXsp cit::displaceSolutionVector(const VectorXsp& x, const VectorXd& delta,
       CIT_ASSERT(traceResult.endPoint.type == SurfacePointType::Face);
       if (snapFacePointToEdge(traceResult.endPoint)) {
         traceResult.pathPoints.push_back(traceResult.endPoint);
-        DLOG_DEBUG(logDepth + 1, "Snapped {}'s vertex {} onto {}'s edge {}", mdataP.shortName, i - offset, mdataQ.shortName, traceResult.endPoint.edge);
+        DLOG_DEBUG(logDepth + 1, "Snapped {}'s vertex {} onto {}'s edge {}", mdataP.name, i - offset, mdataQ.name, traceResult.endPoint.edge);
         ++nSnapped;
       }
 

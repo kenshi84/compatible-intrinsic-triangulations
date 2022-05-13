@@ -47,7 +47,15 @@ template<typename FormatString, typename... Args> void logCritical(spdlog::logge
 #define DLOG_CRITICAL(depth, ...) LOG_CRITICAL(spdlog::default_logger(), depth, __VA_ARGS__)
 
 
-#define CIT_ASSERT(CONDITION) do { GC_SAFETY_ASSERT((CONDITION), ""); } while (false)
+#define CIT_ASSERT_WITH_LOG(cond, ...) \
+  do { \
+    if (!(cond)) { \
+      SPDLOG_ERROR(__VA_ARGS__); \
+      std::abort(); \
+    } \
+  } while (false)
+
+#define CIT_ASSERT(cond) CIT_ASSERT_WITH_LOG(cond, "Assertion failed")
 
 #define MAX_NTHREADS 8
 
@@ -208,8 +216,7 @@ struct ModelData {
   EdgeData<Matrix2d> transportOperator;
 
   AlignedBox3d bbox;
-  std::string shortName;    // "A" or "B"
-  std::string fullName;
+  std::string name;    // "A" or "B"
   kt84::TextureObject texture;
   kt84::CameraFree camera;
   kt84::DisplayList dispList;
@@ -437,6 +444,8 @@ extern std::map<uint64_t, ResultInfo> resultInfoTable;
 // other global data |
 //-------------------+
 
+extern std::string dataDir;
+
 extern double current_wL;             // weight for the Laplacian preconditioner term
 extern double current_smax;
 extern std::list<std::pair<VectorXd, SparseMatrixd>> currentHistory;
@@ -450,7 +459,6 @@ extern int window_height;
 extern ImGuiIO* io;
 extern uint64_t sessionID;
 extern kt84::TextureObject colormapTexture;
-extern std::string caseName;
 
 extern int highlightedVertexID;
 extern std::pair<int, int> highlightedEdgeID;
