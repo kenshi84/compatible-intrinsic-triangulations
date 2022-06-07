@@ -141,6 +141,15 @@ void cit::callback_mousebutton(GLFWwindow* window, int button, int action, int m
     }
   } else if (actionFlag.release) {
     if (camera_active) {
+      // Print camera parameters
+      std::cout << "Camera param:" << std::endl
+        << mdataA.camera.eye   .transpose() << " "
+        << mdataA.camera.center.transpose() << " "
+        << mdataA.camera.up    .transpose() << " "
+        << mdataB.camera.eye   .transpose() << " "
+        << mdataB.camera.center.transpose() << " "
+        << mdataB.camera.up    .transpose() << std::endl;
+
       if (camera_active->drag_mode == Camera::DragMode::PAN) {
         double sx = (double)window_width * (camera_active == &mdataA.camera ? 0.25 : 0.75);
         double sy = (double)window_height * 0.5;

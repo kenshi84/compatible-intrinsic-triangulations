@@ -232,11 +232,21 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
   if (tweaks.f["vertexRadius"]) {
     glLineWidth(1);
     for (Vertex v : cointriP.signpostTri->intrinsicMesh->vertices()) {
+      if (tweaks.b["vertexHideOriginal"] && v.getIndex() < mdataP.nV) continue;
+      if (tweaks.b["vertexHideInserted"] && v.getIndex() >= mdataP.nV) continue;
+
       glPushMatrix();
 
+      if (tweaks.b["vertexUseModelColor"]) {
+        if (v.getIndex() < mdataP.nV)
+          glColor3d(mdataP.inputEdgeColor);
+        else
+          glColor3d(mdataQ.inputEdgeColor);
+      } else {
+        glColor3d(getRandomColor(cointriP.uniqueID_per_Vertex[v]));
+      }
+
       // Translate to the vertex position
-      Vector3 c = getRandomColor(cointriP.uniqueID_per_Vertex[v]);
-      glColor3d(c);
       const SurfacePoint& p = cointriP.signpostTri->vertexLocations[v];
       Vector3 xyz = p.interpolate(mdataP.geometry->inputVertexPositions);
       glTranslated(xyz);
@@ -252,7 +262,7 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
       kt84::glutSolidSphere(r, N, N / 2);
 
       // Draw silhouette if original
-      if (v.getIndex() < mdataP.nV) {
+      if (v.getIndex() < mdataP.nV && tweaks.f["vertexSilhouetteRatio"]) {
         // Align Z axis to eye direction
         Vector3 unitZ{0,0,1};
         glRotated(angle(unitZ, toEye) * 180. / M_PI, cross(unitZ, toEye));
@@ -307,7 +317,9 @@ void drawCoInTri(const CoInTri& cointriP, const CoInTri& cointriQ) {
     Vector3 c;
     if (isEdgeCompatible(cointriP, e)) {
       r = tweaks.f["compatibleEdgeRadius"];
-      if (tweaks.b["showIncompatiblePatchBoundary"] && isFaceCompatible(cointriP, e.halfedge().face()) + isFaceCompatible(cointriP, e.halfedge().twin().face()) == 1)
+      if (tweaks.b["drawEdgeInBlack"])
+        c = {0., 0., 0.};
+      else if (tweaks.b["showIncompatiblePatchBoundary"] && isFaceCompatible(cointriP, e.halfedge().face()) + isFaceCompatible(cointriP, e.halfedge().twin().face()) == 1)
         c = {1.,0.,0.};
       else
         c = Vector3::constant(0.5) + 0.5 * getRandomColor(getUniqueEdgeID(cointriP, e));
@@ -705,6 +717,9 @@ void cit::draw() {
 
   if (ImGui::TreeNode("Vertex")) {
     if (ImGui::SliderFloat("Radius", &tweaks.f["vertexRadius"], 0.f, 0.02f, "%.5f")) invalidateDispList();
+    if (ImGui::Checkbox("Use model color", &tweaks.b["vertexUseModelColor"])) invalidateDispList();
+    if (ImGui::Checkbox("Hide original", &tweaks.b["vertexHideOriginal"])) invalidateDispList();
+    if (ImGui::Checkbox("Hide inserted", &tweaks.b["vertexHideInserted"])) invalidateDispList();
     if (ImGui::SliderFloat("Silhouette ratio", &tweaks.f["vertexSilhouetteRatio"], 0.f, 2.f, "%.5f")) invalidateDispList();
     if (ImGui::SliderFloat("Silhouette offset", &tweaks.f["vertexSilhouetteOffset"], 0.f, 2.f, "%.5f")) invalidateDispList();
     ImGui::TreePop();
@@ -722,6 +737,7 @@ void cit::draw() {
     if (ImGui::SliderFloat("Offset", &tweaks.f["intrinsicEdgeOffset"], 0.f, 5.f, "%.5f")) invalidateDispList();
     if (ImGui::SliderFloat("Incompatible edge brightness", &tweaks.f["incompatibleEdgeBrightness"], 0.f, 0.5f)) invalidateDispList();
     if (ImGui::Checkbox("Incomatible patch", &tweaks.b["showIncompatiblePatchBoundary"])) invalidateDispList();
+    if (ImGui::Checkbox("Draw compatible edges in black", &tweaks.b["drawEdgeInBlack"])) invalidateDispList();
     ImGui::TreePop();
   }
 
